@@ -1,3 +1,8 @@
+// -----------------------------------------------------------
+// ---------------          LEXER          -------------------
+// ---  Responsible for producing tokens from the source   ---
+// -----------------------------------------------------------
+
 // Supported types
 export enum TokenType {
   Number,
@@ -70,11 +75,11 @@ export function tokenize(sourceCode: string): Token[] {
         }
         tokens.push(token(num, TokenType.Number));
       } else if (isAlpha(src[0])) {
-        let ident = ""; //Let or Foo
+        let ident = "";
         while (src.length > 0 && isAlpha(src[0])) {
           ident += src.shift();
         }
-        // check for reversed keywords
+        // Check for reversed keywords (Ex. Let)
         const reserved = KEYWORDS[ident];
         if (reserved == undefined) {
           tokens.push(token(ident, TokenType.Identifier));
@@ -82,7 +87,7 @@ export function tokenize(sourceCode: string): Token[] {
           tokens.push(token(ident, reserved));
         }
       } else if (isSkippable(src[0])) {
-        src.shift(); //SKIP CURRENT CHARACTER
+        src.shift();
       } else {
         console.log("Unrecognized character found in source: ", src[0]);
         Deno.exit(1);
