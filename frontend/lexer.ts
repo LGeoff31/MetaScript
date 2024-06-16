@@ -5,18 +5,26 @@
 
 // Supported types
 export enum TokenType {
+  // Literal Types
+  Null,
   Number,
   Identifier,
+
+  // Keywords
+  Let,
+
+  //Grouping + Operators
   Equals,
   OpenParen,
   CloseParen,
   BinaryOperator,
-  Let,
+  EOF,
 }
 
 // Variable / User defined types
 const KEYWORDS: Record<string, TokenType> = {
   let: TokenType.Let,
+  null: TokenType.Null,
 };
 
 export interface Token {
@@ -61,7 +69,8 @@ export function tokenize(sourceCode: string): Token[] {
       src[0] == "+" ||
       src[0] == "-" ||
       src[0] == "*" ||
-      src[0] == "/"
+      src[0] == "/" ||
+      src[0] == "%"
     ) {
       tokens.push(token(src.shift(), TokenType.BinaryOperator));
     } else if (src[0] == "=") {
@@ -81,10 +90,10 @@ export function tokenize(sourceCode: string): Token[] {
         }
         // Check for reversed keywords (Ex. Let)
         const reserved = KEYWORDS[ident];
-        if (reserved == undefined) {
-          tokens.push(token(ident, TokenType.Identifier));
-        } else {
+        if (typeof reserved == "number") {
           tokens.push(token(ident, reserved));
+        } else {
+          tokens.push(token(ident, TokenType.Identifier));
         }
       } else if (isSkippable(src[0])) {
         src.shift();
@@ -94,10 +103,6 @@ export function tokenize(sourceCode: string): Token[] {
       }
     }
   }
+  tokens.push({ type: TokenType.EOF, value: "EndOfFile" });
   return tokens;
-}
-
-const source = await Deno.readTextFile("./test.txt");
-for (const token of tokenize(source)) {
-  console.log(token);
 }
