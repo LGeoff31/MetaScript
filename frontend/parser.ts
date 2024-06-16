@@ -5,7 +5,8 @@ import {
   BinaryExpr,
   NumericLiteral,
   Identifier,
-  NullLiteral,
+  VarDeclaration,
+  AssignmentExpr,
 } from "./ast.ts";
 import { tokenize, Token, TokenType } from "./lexer.ts";
 
@@ -57,12 +58,65 @@ export default class Parser {
   // Handle complex statement types
   private parse_stmt(): Stmt {
     // Skip to parse_expr for now
-    return this.parse_expr();
+    switch (this.at().type) {
+      case TokenType.Let:
+
+      case TokenType.Const:
+        return this.parse_var_declaration();
+
+      default:
+        return this.parse_expr();
+    }
+  }
+
+  // CONST | LET followed by IDENTIFIER; or =
+  parse_var_declaration(): Stmt {
+    const isConstant = this.eat().type == TokenType.Const;
+    const identifier = this.expect(
+      TokenType.Identifier,
+      "Expected Identifier name following let | const keyword."
+    ).value;
+    if (this.at().type == TokenType.Semicolon) {
+      this.eat();
+      if (isConstant) {
+        throw "Must assign value to constant expression. No value provided.";
+      }
+      return {
+        kind: "VarDeclaration",
+        identifier,
+        constant: false,
+      } as VarDeclaration;
+    }
+    this.expect(
+      TokenType.Equals,
+      "Expected equals token following identifier in var declaration."
+    );
+    const declaration = {
+      kind: "VarDeclaration",
+      value: this.parse_expr(),
+      identifier,
+      constant: isConstant,
+    } as VarDeclaration;
+    // If want language to end in semi colon
+    this.expect(
+      TokenType.Semicolon,
+      "Variable declaration statement must end with semi colon"
+    );
+    return declaration;
   }
 
   // Handle expressions
   private parse_expr(): Expr {
-    return this.parse_additive_expr();
+    return this.parse_assignment_expr();
+  }
+  parse_assignment_expr(): Expr {
+    const left = this.parse_additive_expr();
+    if (this.at().type == TokenType.Equals) {
+      this.eat();
+      const value = this.parse_assignment_expr(); // x = foo = bar (chaining)
+      return { value, assigne: left, kind: "AssignmentExpr" } as AssignmentExpr;
+    }
+    return left;
   }
 
   // Handle addition & subtraction operations
@@ -124,9 +178,7 @@ export default class Parser {
     switch (tk) {
       case TokenType.Identifier:
         return { kind: "Identifier", symbol: this.eat().value } as Identifier;
-      case TokenType.Null:
-        this.eat(); // Advance past null keyword
-        return { kind: "NullLiteral", value: "null" } as NullLiteral;
+
       case TokenType.Number:
         return {
           kind: "NumericLiteral",

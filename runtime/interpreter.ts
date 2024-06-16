@@ -1,72 +1,41 @@
-import { ValueType, RuntimeVal, NumberVal, NullVal } from "./values.ts";
+import { ValueType, RuntimeVal, NumberVal, MK_NULL } from "./values.ts";
 import {
+  AssignmentExpr,
   BinaryExpr,
+  Identifier,
   NodeType,
   NumericLiteral,
   Program,
   Stmt,
+  VarDeclaration,
 } from "../frontend/ast.ts";
+import Environment from "./environment.ts";
+import {
+  eval_assignment,
+  eval_binary_expr,
+  eval_identifier,
+} from "./eval/expression.ts";
+import { eval_program, eval_var_declaration } from "./eval/statements.ts";
 
-function eval_program(program: Program): RuntimeVal {
-  let lastEvaluated: RuntimeVal = { type: "null", value: "null" } as NullVal;
-  for (const statement of program.body) {
-    lastEvaluated = evaluate(statement);
-  }
-  return lastEvaluated;
-}
-
-function eval_numeric_binary_expr(
-  lhs: NumberVal,
-  rhs: NumberVal,
-  operator: string
-): NumberVal {
-  let result: number;
-  if (operator == "+") {
-    result = lhs.value + rhs.value;
-  } else if (operator == "-") {
-    result = lhs.value - rhs.value;
-  } else if (operator == "*") {
-    result = lhs.value * rhs.value;
-  } else if (operator == "/") {
-    // TODO: Division by zero check
-    result = lhs.value / rhs.value;
-  } else {
-    result = lhs.value % rhs.value;
-  }
-  return { value: result, type: "number" };
-}
-
-function eval_binary_expr(binop: BinaryExpr): RuntimeVal {
-  console.log("binop", binop);
-  const lhs = evaluate(binop.left);
-  const rhs = evaluate(binop.right);
-  console.log("This is left: ", lhs);
-  console.log("This is right: ", rhs);
-
-  if (lhs.type == "number" && rhs.type == "number") {
-    return eval_numeric_binary_expr(
-      lhs as NumberVal,
-      rhs as NumberVal,
-      binop.operator
-    );
-  }
-  // One of both are NULL
-  return { type: "null", value: "null" } as NullVal;
-}
-
-export function evaluate(astNode: Stmt): RuntimeVal {
+export function evaluate(astNode: Stmt, env: Environment): RuntimeVal {
   switch (astNode.kind) {
     case "NumericLiteral":
       return {
         value: (astNode as NumericLiteral).value,
         type: "number",
       } as NumberVal;
-    case "NullLiteral":
-      return { value: "null", type: "null" } as NullVal;
+
     case "BinaryExpr":
-      return eval_binary_expr(astNode as BinaryExpr);
+      return eval_binary_expr(astNode as BinaryExpr, env);
     case "Program":
-      return eval_program(astNode as Program);
+      return eval_program(astNode as Program, env);
+    case "Identifier":
+      return eval_identifier(astNode as Identifier, env);
+    case "AssignmentExpr":
+      return eval_assignment(astNode as AssignmentExpr, env);
+    // Handle statements
+    case "VarDeclaration":
+      return eval_var_declaration(astNode as VarDeclaration, env);
     default:
       console.error(
         "This AST Node has not yet been setup for interpretation.",

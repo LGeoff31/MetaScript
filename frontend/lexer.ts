@@ -6,15 +6,16 @@
 // Supported types
 export enum TokenType {
   // Literal Types
-  Null,
   Number,
   Identifier,
 
   // Keywords
   Let,
+  Const,
 
   //Grouping + Operators
   Equals,
+  Semicolon,
   OpenParen,
   CloseParen,
   BinaryOperator,
@@ -24,7 +25,7 @@ export enum TokenType {
 // Variable / User defined types
 const KEYWORDS: Record<string, TokenType> = {
   let: TokenType.Let,
-  null: TokenType.Null,
+  const: TokenType.Const,
 };
 
 export interface Token {
@@ -75,6 +76,8 @@ export function tokenize(sourceCode: string): Token[] {
       tokens.push(token(src.shift(), TokenType.BinaryOperator));
     } else if (src[0] == "=") {
       tokens.push(token(src.shift(), TokenType.Equals));
+    } else if (src[0] == ";") {
+      tokens.push(token(src.shift(), TokenType.Semicolon));
     } else {
       // Handling tokens of multiple characters
       if (isInt(src[0])) {
