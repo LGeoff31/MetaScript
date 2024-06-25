@@ -7,6 +7,8 @@ import {
   Identifier,
   VarDeclaration,
   AssignmentExpr,
+  Property,
+  ObjectLiteral,
 } from "./ast.ts";
 import { tokenize, Token, TokenType } from "./lexer.ts";
 
@@ -109,14 +111,54 @@ export default class Parser {
   private parse_expr(): Expr {
     return this.parse_assignment_expr();
   }
-  parse_assignment_expr(): Expr {
-    const left = this.parse_additive_expr();
+  private parse_assignment_expr(): Expr {
+    const left = this.parse_object_expr();
     if (this.at().type == TokenType.Equals) {
       this.eat();
       const value = this.parse_assignment_expr(); // x = foo = bar (chaining)
       return { value, assigne: left, kind: "AssignmentExpr" } as AssignmentExpr;
     }
     return left;
+  }
+  private parse_object_expr(): Expr {
+    if (this.at().type !== TokenType.OpenBrace) {
+      return this.parse_additive_expr();
+    }
+    this.eat();
+    const properties = new Array<Property>();
+    while (this.not_eof() && this.at().type != TokenType.CloseBrace) {
+      // {key: val, key2: val}
+      const key = this.expect(
+        TokenType.Identifier,
+        "Object literal key expected"
+      ).value;
+      // Allows shothand key: pair -> key -> {key,}
+      if (this.at().type == TokenType.Comma) {
+        this.eat();
+        properties.push({ key, kind: "Property" } as Property);
+        continue;
+      } else if (this.at().type == TokenType.CloseBrace) {
+        //{key}
+        properties.push({ key, kind: "Property" });
+        continue;
+      }
+
+      // {key: val}
+      this.expect(
+        TokenType.Colon,
+        "Missing colon following identifier in ObjectExpr"
+      );
+      const value = this.parse_expr();
+      properties.push({ kind: "Property", value, key });
+      if (this.at().type != TokenType.CloseBrace) {
+        this.expect(
+          TokenType.Comma,
+          "Expected comma or closing bracket following property"
+        );
+      }
+    }
+    this.expect(TokenType.CloseBrace, "Object literal missing closing brace.");
+    return { kind: "ObjectLiteral", properties } as ObjectLiteral;
   }
 
   // Handle addition & subtraction operations

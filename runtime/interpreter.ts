@@ -5,6 +5,7 @@ import {
   Identifier,
   NodeType,
   NumericLiteral,
+  ObjectLiteral,
   Program,
   Stmt,
   VarDeclaration,
@@ -14,6 +15,7 @@ import {
   eval_assignment,
   eval_binary_expr,
   eval_identifier,
+  eval_object_expr,
 } from "./eval/expression.ts";
 import { eval_program, eval_var_declaration } from "./eval/statements.ts";
 
@@ -31,6 +33,8 @@ export function evaluate(astNode: Stmt, env: Environment): RuntimeVal {
       return eval_program(astNode as Program, env);
     case "Identifier":
       return eval_identifier(astNode as Identifier, env);
+    case "ObjectLiteral":
+      return eval_object_expr(astNode as ObjectLiteral, env);
     case "AssignmentExpr":
       return eval_assignment(astNode as AssignmentExpr, env);
     // Handle statements
