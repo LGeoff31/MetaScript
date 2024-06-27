@@ -1,10 +1,5 @@
-const foo = 45 / 2;
-
-const obj = {
-    x:100,
-    y:32,
-    foo,
-    complex: {
-        bar: true,
-    },
-};
+let foo = 5*2;
+foo = foo / 4 + 5
+print(foo, 45)
+const timeNow = time();
+print(timeNow)

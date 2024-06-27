@@ -1,12 +1,19 @@
 import {
   AssignmentExpr,
   BinaryExpr,
+  CallExpr,
   Identifier,
   ObjectLiteral,
 } from "../../frontend/ast.ts";
 import Environment from "../environment.ts";
 import { evaluate } from "../interpreter.ts";
-import { NumberVal, RuntimeVal, MK_NULL, ObjectVal } from "../values.ts";
+import {
+  NumberVal,
+  RuntimeVal,
+  MK_NULL,
+  ObjectVal,
+  NativeFnValue,
+} from "../values.ts";
 
 export function eval_numeric_binary_expr(
   lhs: NumberVal,
@@ -81,4 +88,14 @@ export function eval_object_expr(
     object.properties.set(key, runtimeVal);
   }
   return object;
+}
+
+export function eval_call_expr(expr: CallExpr, env: Environment): RuntimeVal {
+  const args = expr.args.map((arg) => evaluate(arg, env));
+  const fn = evaluate(expr.caller, env);
+  if (fn.type !== "native-fn") {
+    throw "Cannot call value that is not a function: " + JSON.stringify(fn);
+  }
+  const result = (fn as NativeFnValue).call(args, env);
+  return result;
 }

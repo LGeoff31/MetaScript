@@ -2,6 +2,7 @@ import { ValueType, RuntimeVal, NumberVal, MK_NULL } from "./values.ts";
 import {
   AssignmentExpr,
   BinaryExpr,
+  CallExpr,
   Identifier,
   NodeType,
   NumericLiteral,
@@ -14,6 +15,7 @@ import Environment from "./environment.ts";
 import {
   eval_assignment,
   eval_binary_expr,
+  eval_call_expr,
   eval_identifier,
   eval_object_expr,
 } from "./eval/expression.ts";
@@ -35,6 +37,8 @@ export function evaluate(astNode: Stmt, env: Environment): RuntimeVal {
       return eval_identifier(astNode as Identifier, env);
     case "ObjectLiteral":
       return eval_object_expr(astNode as ObjectLiteral, env);
+    case "CallExpr":
+      return eval_call_expr(astNode as CallExpr, env);
     case "AssignmentExpr":
       return eval_assignment(astNode as AssignmentExpr, env);
     // Handle statements
