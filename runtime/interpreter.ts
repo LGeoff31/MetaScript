@@ -3,6 +3,7 @@ import {
   AssignmentExpr,
   BinaryExpr,
   CallExpr,
+  FunctionDeclaration,
   Identifier,
   NodeType,
   NumericLiteral,
@@ -19,7 +20,11 @@ import {
   eval_identifier,
   eval_object_expr,
 } from "./eval/expression.ts";
-import { eval_program, eval_var_declaration } from "./eval/statements.ts";
+import {
+  eval_function_declaration,
+  eval_program,
+  eval_var_declaration,
+} from "./eval/statements.ts";
 
 export function evaluate(astNode: Stmt, env: Environment): RuntimeVal {
   switch (astNode.kind) {
@@ -44,6 +49,8 @@ export function evaluate(astNode: Stmt, env: Environment): RuntimeVal {
     // Handle statements
     case "VarDeclaration":
       return eval_var_declaration(astNode as VarDeclaration, env);
+    case "FunctionDeclaration":
+      return eval_function_declaration(astNode as FunctionDeclaration, env);
     default:
       console.error(
         "This AST Node has not yet been setup for interpretation.",
