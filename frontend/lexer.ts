@@ -14,6 +14,10 @@ export enum TokenType {
   Const,
   Fn,
 
+  // Conditionals
+  If,
+  Else,
+
   //Grouping + Operators
   Equals,
   Comma,
@@ -35,6 +39,8 @@ const KEYWORDS: Record<string, TokenType> = {
   let: TokenType.Let,
   const: TokenType.Const,
   fn: TokenType.Fn,
+  if: TokenType.If,
+  else: TokenType.Else,
 };
 
 export interface Token {
@@ -114,7 +120,7 @@ export function tokenize(sourceCode: string): Token[] {
         while (src.length > 0 && isAlpha(src[0])) {
           ident += src.shift();
         }
-        // Check for reversed keywords (Ex. Let)
+        // Check for reserved keywords (Ex. Let)
         const reserved = KEYWORDS[ident];
         if (typeof reserved == "number") {
           tokens.push(token(ident, reserved));
@@ -124,7 +130,7 @@ export function tokenize(sourceCode: string): Token[] {
       } else if (isSkippable(src[0])) {
         src.shift();
       } else {
-        console.log("Unrecognized character found in source: ", src[0]);
+        // console.log("Unrecognized character found in source: ", src[0]);
         Deno.exit(1);
       }
     }

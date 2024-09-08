@@ -3,6 +3,7 @@ import {
   BinaryExpr,
   CallExpr,
   Identifier,
+  IfExpr,
   ObjectLiteral,
 } from "../../frontend/ast.ts";
 import Environment from "../environment.ts";
@@ -41,11 +42,11 @@ export function eval_binary_expr(
   binop: BinaryExpr,
   env: Environment
 ): RuntimeVal {
-  console.log("binop", binop);
+  // console.log("binop", binop);
   const lhs = evaluate(binop.left, env);
   const rhs = evaluate(binop.right, env);
-  console.log("This is left: ", lhs);
-  console.log("This is right: ", rhs);
+  // console.log("This is left: ", lhs);
+  // console.log("This is right: ", rhs);
 
   if (lhs.type == "number" && rhs.type == "number") {
     return eval_numeric_binary_expr(
@@ -114,4 +115,18 @@ export function eval_call_expr(expr: CallExpr, env: Environment): RuntimeVal {
     return result;
   }
   throw "Cannot call value that is not a function: " + JSON.stringify(fn);
+}
+
+export function eval_if_expr(expr: IfExpr, env: Environment): RuntimeVal {
+  const condition = evaluate(expr.cond, env);
+
+  if (condition.type !== "number") {
+    throw "Invalid condition";
+  }
+
+  if ((condition as NumberVal).value) {
+    return evaluate(expr.body1, env);
+  } else {
+    return evaluate(expr.body2, env);
+  }
 }

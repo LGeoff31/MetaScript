@@ -13,6 +13,7 @@ export type NodeType =
   | "AssignmentExpr"
   | "MemberExpr"
   | "CallExpr"
+  | "IfExpr"
 
   // Literals
   | "Property"
@@ -45,6 +46,13 @@ export interface FunctionDeclaration extends Stmt {
 }
 
 export interface Expr extends Stmt {}
+
+export interface IfExpr extends Expr {
+  kind: "IfExpr";
+  cond: Expr;
+  body1: Stmt;
+  body2: Stmt;
+}
 
 export interface AssignmentExpr extends Expr {
   kind: "AssignmentExpr";

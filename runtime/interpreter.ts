@@ -5,6 +5,7 @@ import {
   CallExpr,
   FunctionDeclaration,
   Identifier,
+  IfExpr,
   NodeType,
   NumericLiteral,
   ObjectLiteral,
@@ -18,6 +19,7 @@ import {
   eval_binary_expr,
   eval_call_expr,
   eval_identifier,
+  eval_if_expr,
   eval_object_expr,
 } from "./eval/expression.ts";
 import {
@@ -51,6 +53,8 @@ export function evaluate(astNode: Stmt, env: Environment): RuntimeVal {
       return eval_var_declaration(astNode as VarDeclaration, env);
     case "FunctionDeclaration":
       return eval_function_declaration(astNode as FunctionDeclaration, env);
+    case "IfExpr":
+      return eval_if_expr(astNode as IfExpr, env);
     default:
       console.error(
         "This AST Node has not yet been setup for interpretation.",

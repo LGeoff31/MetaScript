@@ -3,7 +3,7 @@ import Environment, { createGlobalEnv } from "./runtime/environment.ts";
 import { evaluate } from "./runtime/interpreter.ts";
 import { NumberVal, MK_NUMBER, MK_BOOL, MK_NULL } from "./runtime/values.ts";
 
-run("./test.txt");
+run("./test_if.txt");
 
 async function run(filename: string) {
   const parser = new Parser();

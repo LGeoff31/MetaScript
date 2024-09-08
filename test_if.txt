@@ -1,0 +1,3 @@
+let a = 10;
+let b = if (0) {55} else {100};
+print(b)

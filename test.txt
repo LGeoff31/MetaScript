@@ -1,13 +1,14 @@
-fn add (x, y) {
-    x+y
-}
+let foo = 50 / 2;
 
-fn makeAdder(offset) {
-    fn add (x, y) {
-        x+y+offset
-    }
-    add
-}
+const obj = {
+  x: 100,
+  y: 32,
+  foo: foo,
+  complex: {
+    bar: true,
+  },
+};
 
-const adder = makeAdder(1);
-print(adder(10, 5))
+let f = object.complex.bar;
+
+print(foo)

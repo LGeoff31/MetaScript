@@ -12,6 +12,7 @@ import {
   CallExpr,
   MemberExpr,
   FunctionDeclaration,
+  IfExpr,
 } from "./ast.ts";
 import { tokenize, Token, TokenType } from "./lexer.ts";
 
@@ -39,7 +40,7 @@ export default class Parser {
   private expect(type: TokenType, err: any) {
     const prev = this.tokens.shift() as Token;
     if (!prev || prev.type != type) {
-      console.error("Parser Error: \n", err, prev, "Expecting: ", type);
+      // console.error("Parser Error: \n", err, prev, "Expecting: ", type);
       Deno.exit(1);
     }
     return prev;
@@ -85,7 +86,7 @@ export default class Parser {
     const params: string[] = [];
     for (const arg of args) {
       if (arg.kind !== "Identifier") {
-        console.log(arg);
+        // console.log(arg);
         throw "Inside of function declaration, expected parameters to be of type string.";
       }
       params.push((arg as Identifier).symbol);
@@ -152,9 +153,41 @@ export default class Parser {
     return declaration;
   }
 
+  // if (cond) { body1 } else { body2 }
+  parse_if_expr(): Expr {
+    this.expect(TokenType.If, "Expected to start with if");
+    this.expect(TokenType.OpenParen, "Expected '('");
+
+    // Take the condition part
+    const cond = this.parse_expr();
+
+    this.expect(TokenType.CloseParen, "Expected ')'");
+
+    this.expect(TokenType.OpenBrace, "Expected '{'");
+
+    const body1 = this.parse_expr();
+
+    this.expect(TokenType.CloseBrace, "Expected '}'");
+
+    this.expect(TokenType.Else, "Expected 'else'");
+
+    this.expect(TokenType.OpenBrace, "Expected '{'");
+
+    const body2 = this.parse_expr();
+
+    this.expect(TokenType.CloseBrace, "Expected '}'");
+
+    return { kind: "IfExpr", cond, body1, body2 } as IfExpr;
+  }
+
   // Handle expressions
   private parse_expr(): Expr {
-    return this.parse_assignment_expr();
+    switch (this.at().type) {
+      case TokenType.If:
+        return this.parse_if_expr();
+      default:
+        return this.parse_assignment_expr();
+    }
   }
   private parse_assignment_expr(): Expr {
     const left = this.parse_object_expr();
