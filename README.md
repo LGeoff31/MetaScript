@@ -1,10 +1,10 @@
 # MetaScript 🌟
 
-MetaScript is a lightweight scripting language designed for educational purposes. It demonstrates fundamental concepts of language design, including lexing, parsing, and interpretation.
+MetaScript is a lightweight scripting language designed for educational purposes. It demonstrates fundamental concepts of language design, including tokenizing, parsing, and interpretation.
 
 ## Features 🛠️
 
-** Lexer 🔍  
+** Tokenizer 🔍  
 Built a lexer to convert source code into an array of tokens. Tokens are categorized into keywords, identifiers, operators, and literals.
 
 ** AST Definitions 🌳  
